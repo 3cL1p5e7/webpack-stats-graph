@@ -13,10 +13,11 @@ module.exports = {
   output: {
     path: dist,
     filename: 'index.js',
+    publicPath: '/',
     pathinfo: true
   },
   plugins: [
-    new Clean([dist])
+    // new Clean([dist])
   ],
   module: {
     loaders: [

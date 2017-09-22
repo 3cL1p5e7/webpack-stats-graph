@@ -77,4 +77,4 @@
       return this;
     }
   };
-}).call(this);
+}).call(window);

@@ -388,7 +388,7 @@
 
           this.jobs[id] = job;
           conrad.addJob(id, job.bind(this));
-        }).call(this);
+        }).call(window);
       else {
         for (k in this.edgeFloatArrays) {
           renderer = sigma.webgl.edges[k];
@@ -714,4 +714,4 @@
    * node, the renderer and a settings function.
    */
   sigma.utils.pkg('sigma.canvas.labels');
-}).call(this);
+}).call(window);

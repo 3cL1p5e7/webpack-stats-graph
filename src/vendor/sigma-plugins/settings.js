@@ -38,4 +38,4 @@
   // Override default settings:
   sigma.settings.drawEdgeLabels = true;
 
-}).call(this);
+}).call(window);

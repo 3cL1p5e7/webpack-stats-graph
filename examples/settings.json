@@ -1,0 +1,74 @@
+{
+  "standartCaptor":false,
+  "mode":"graph",
+  "dataFileName":"../../static/Json/faces.json",
+  "sigmaSettings":{
+    "nodesPowRatio":0,
+    "edgesPowRatio":0,
+    "zoomMin":0.0005,
+    "zoomMax":5,
+    "drawLabels":false,
+    "drawEdgeLabels":false,
+    "edgeHoverSizeRatio":6,
+    "edgeArrowHoverSizeRatio":3.7,
+    "defaultEdgeType":"modelling",
+    "defaultEdgeColor":"rgba(138, 173, 226, 0.8)",
+    "defaultEdgeArrowColor":"rgba(0, 0, 0, 1.0)",
+    "edgeColor":"default",
+    "enableEdgeHovering":false,
+    "labelSize":false,
+    "labelSizeRatio":2.3,
+    "labelThreshold":1,
+    "defaultLabelColor":"#FFFFFF",
+    "defaultLabelHoverColor":"#FFFFFF",
+    "defaultHoverLabelBGColor":"#2D7FB6",
+    "defaultHoverLabelColor":"#2D7FB6",
+    "labelHoverBGColor":"node",
+    "webglOversamplingRatio": 1.2
+  },
+  "visualSettings":{
+    "border":{
+      "border_width_per":0.3
+    },
+    "node":{
+      "label":"label",
+      "defaultColor":"#3482B9",
+      "transparency":1,
+      "rangers":{
+        "sizing":{
+          "field":"",
+          "defaultValue": 7
+        },
+        "coloring":{
+          "field":"",
+          "range":[
+            "#ffffff",
+            "#f02020"
+          ]
+        }
+      },
+      "min_size": 3,
+      "max_size": 10
+    },
+    "edge":{
+      "label":"label",
+      "arrowSize":8,
+      "transparency":1,
+      "defaultColor":"#3482B9",
+      "rangers":{
+        "sizing":{
+          "field":""
+        },
+        "coloring":{
+          "field":"",
+          "range":[
+            "#000000",
+            "#f02020"
+          ]
+        }
+      },
+      "min_size": 1.0,
+      "max_size": 3
+    }
+  }
+}

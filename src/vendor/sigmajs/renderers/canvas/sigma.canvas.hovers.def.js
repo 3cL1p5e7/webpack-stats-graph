@@ -105,4 +105,4 @@
       );
     }
   };
-}).call(this);
+}).call(window);

@@ -1,0 +1,6 @@
+{
+  "presets": ["node6", "env"],
+  "plugins": [
+    "transform-function-bind"
+  ]
+}

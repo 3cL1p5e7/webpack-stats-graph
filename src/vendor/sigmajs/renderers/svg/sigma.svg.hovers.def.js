@@ -110,4 +110,4 @@
       return group;
     }
   };
-}).call(this);
+}).call(window);

@@ -345,4 +345,4 @@
       }
     }
   };
-}).call(this);
+}).call(window);

@@ -22,4 +22,4 @@
     function(edge, source, target, context, settings) {
     sigma.canvas.edges.labels.curve(edge, source, target, context, settings);
   };
-}).call(this);
+}).call(window);

@@ -1,4 +1,4 @@
-var graphHandler = {
+var graphHandler = window.graphHandler = {
   isMouseDown: false,
   startMouseX: 0,
   startMouseY: 0,

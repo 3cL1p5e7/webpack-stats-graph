@@ -237,4 +237,4 @@
       )
     };
   };
-}).call(this);
+}).call(window);

@@ -115,4 +115,4 @@
     else if (typeof target === 'object')
       return parse(gexf.parse(target));
   };
-}).call(this);
+}).call(window);

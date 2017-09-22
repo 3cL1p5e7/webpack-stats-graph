@@ -1019,4 +1019,4 @@
       a20 * b02 + a21 * b12 + a22 * b22
     ];
   };
-}).call(this);
+}).call(window);
