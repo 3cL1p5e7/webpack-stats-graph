@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body{
+      overflow: hidden;
+      margin: 0px;
+    }
+    #leaf-map:hover{
+      cursor: default;
+    }
+    .graph-container {
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      position: absolute;
+    }
+
+    .spinner-text{
+      display: none;
+    }
+
+    .message{
+      position: absolute;
+      z-index: 9999999;
+      top: 200px;
+      width: 150px;
+      height: 100px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: auto;
+    }
+
+    .spinner {
+      position: absolute;
+      z-index: 9999999;
+      top: 0;
+      width: 50px;
+      height: 50px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: auto;
+      -webkit-animation: rotation .6s infinite linear;
+      border: 6px solid rgba(0, 0, 0, .15);
+      border-top-color: rgba(0, 0, 0, .8);
+      border-radius: 100%;
+    }
+    @-webkit-keyframes rotation {
+      from {
+        -webkit-transform: rotate(0deg);
+      }
+      to {
+        -webkit-transform: rotate(359deg);
+      }
+    }
+  </style>
+  <meta charset=utf-8 />
+
+  <!-- START SIGMA IMPORTS -->
+  <script src="../build/index.js"></script>
+
+  <script id="2d-edge-fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+
+    varying vec4 color;
+
+    void main(void) {
+        gl_FragColor = color;
+    }
+  </script>
+  <script id="2d-edge-vertex-shader" type="x-shader/x-vertex">
+      attribute vec2 a_pos1;
+      attribute vec2 a_pos2;
+      attribute float a_thickness;
+      attribute float a_tSize;
+      attribute float a_delay;
+      attribute float a_minus;
+      attribute float a_head;
+      attribute float a_headPosition;
+      attribute float a_color;
+      attribute float a_transparency;
+      attribute float a_range_by;
+      attribute float a_is_arrow;
+
+      uniform vec2 u_resolution;
+      uniform float u_ratio;
+      uniform float u_nodeRatio;
+      uniform float u_arrowHead;
+      uniform float u_scale;
+      uniform mat3 u_matrix;
+      uniform mat2 u_matrixHalfPi;
+      uniform mat2 u_matrixHalfPiMinus;
+      uniform float u_range_from_color;
+      uniform float u_range_to_color;
+      uniform float u_range_min;
+      uniform float u_range_max;
+
+      varying vec4 color;
+
+      void main() {
+        // Find the good point:
+        vec2 pos = normalize(a_pos2 - a_pos1);
+
+        mat2 matrix = (1.0 - a_head) *
+          (
+            a_minus * u_matrixHalfPiMinus +
+            (1.0 - a_minus) * u_matrixHalfPi
+          ) + a_head * (
+            a_headPosition * u_matrixHalfPiMinus * 0.35 +
+            (a_headPosition * a_headPosition - 1.0) * mat2(1.0)
+          );
+
+        pos = a_pos1 + (
+          // Deal with body:
+          (1.0 - a_head) * a_thickness * u_ratio * matrix * pos +
+          // Deal with head:
+          a_head * u_arrowHead * u_ratio * matrix * pos +
+          // Deal with delay:
+          a_delay * pos * (
+            a_tSize / u_nodeRatio +
+            u_arrowHead * u_ratio
+          )
+        );
+
+        // Scale from [[-1 1] [-1 1]] to the container:
+        gl_Position = vec4(
+          ((u_matrix * vec3(pos, 1)).xy /
+            u_resolution * 2.0 - 1.0) * vec2(1, -1),
+          0,
+          1
+        );
+
+        // color ranger
+        if (a_is_arrow > 0.5 || (u_range_max == 0.0 && u_range_min == 0.0)) { // disabled
+          // Extract the color:
+          float c = a_color;
+          color.b = mod(c, 256.0); c = floor(c / 256.0);
+          color.g = mod(c, 256.0); c = floor(c / 256.0);
+          color.r = mod(c, 256.0); c = floor(c / 256.0); color /= 255.0;
+          color.a = a_transparency;
+        }
+        else { // enabled
+          float rf = u_range_from_color;
+          vec4 rf_color = vec4(0.0, 0.0, 0.0, 0.0);
+          rf_color.b = mod(rf, 256.0); rf = floor(rf / 256.0);
+          rf_color.g = mod(rf, 256.0); rf = floor(rf / 256.0);
+          rf_color.r = mod(rf, 256.0); rf = floor(rf / 256.0);
+          rf_color /= 255.0;
+          rf_color.a = a_transparency;
+
+          float rt = u_range_to_color;
+          vec4 rt_color = vec4(0.0, 0.0, 0.0, 0.0);
+          rt_color.b = mod(rt, 256.0); rt = floor(rt / 256.0);
+          rt_color.g = mod(rt, 256.0); rt = floor(rt / 256.0);
+          rt_color.r = mod(rt, 256.0); rt = floor(rt / 256.0);
+          rt_color /= 255.0;
+          rt_color.a = a_transparency;
+
+          float val = (a_range_by - u_range_min)/(u_range_max - u_range_min);
+          color.r = rf_color.r + (rt_color.r - rf_color.r)*val;
+          color.g = rf_color.g + (rt_color.g - rf_color.g)*val;
+          color.b = rf_color.b + (rt_color.b - rf_color.b)*val;
+          color.a = a_transparency;
+        }
+      }
+  </script>
+  <script id="2d-node-fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+
+      uniform sampler2D u_image0;
+      uniform sampler2D u_image1;
+      uniform float u_border_width_per;
+
+      varying vec4 color;
+      varying vec4 border_color;
+      varying vec2 center;
+      varying float radius;
+      varying vec2 v_position;
+
+      void main(void) {
+          vec4 color0 = vec4(0.0, 0.0, 0.0, 0.0);
+
+          vec2 m = gl_FragCoord.xy - center;
+          float diff = radius - sqrt(m.x * m.x + m.y * m.y) - 1.0;
+
+          vec2 my_position = v_position;
+
+          if (diff > 0.0) {
+            if (diff > radius * u_border_width_per)
+              gl_FragColor = color;
+            else
+              gl_FragColor = border_color;
+          }
+          else {
+            if(diff < -0.3) {
+              discard;
+            }
+            else{
+              color0.r = border_color.r;
+              color0.g = border_color.g;
+              color0.b = border_color.b;
+              color0.a = border_color.a * (0.7 + -diff*1.3);
+              gl_FragColor = color0;
+            }
+          }
+      }
+  </script>
+  <script id="2d-node-vertex-shader" type="x-shader/x-vertex">
+
+      float hue2rgb(float f1, float f2, float hue) {
+        if (hue < 0.0)
+          hue += 1.0;
+        else if (hue > 1.0)
+          hue -= 1.0;
+        float res;
+        if ((6.0 * hue) < 1.0)
+          res = f1 + (f2 - f1) * 6.0 * hue;
+        else if ((2.0 * hue) < 1.0)
+          res = f2;
+        else if ((3.0 * hue) < 2.0)
+          res = f1 + (f2 - f1) * ((2.0 / 3.0) - hue) * 6.0;
+        else
+          res = f1;
+        return res;
+      }
+
+      vec3 hsl2rgb(vec3 hsl) {
+        vec3 rgb;
+
+        if (hsl.y == 0.0) {
+          rgb = vec3(hsl.z); // Luminance
+        } else {
+          float f2;
+
+          if (hsl.z < 0.5)
+            f2 = hsl.z * (1.0 + hsl.y);
+          else
+            f2 = hsl.z + hsl.y - hsl.y * hsl.z;
+
+          float f1 = 2.0 * hsl.z - f2;
+
+          rgb.r = hue2rgb(f1, f2, hsl.x + (1.0/3.0));
+          rgb.g = hue2rgb(f1, f2, hsl.x);
+          rgb.b = hue2rgb(f1, f2, hsl.x - (1.0/3.0));
+        }
+        return rgb;
+      }
+
+      vec3 rgb2hsl(vec4 c) {
+        //c.r = c.r / 255.0;
+        //c.g = c.g / 255.0;
+        //c.b = c.b / 255.0;
+
+        float max_rgb = max(c.r, c.g);
+        max_rgb = max(max_rgb, c.b);
+
+        float min_rgb = min(c.r, c.g);
+        min_rgb = min(min_rgb, c.b);
+
+        float initial = (max_rgb + min_rgb)/2.0;
+        vec3 hsl = vec3(initial, initial, initial);
+
+        if(max_rgb == min_rgb){
+          hsl.x = 0.0;
+          hsl.y = 0.0;
+        }
+        else{
+          float dif = max_rgb - min_rgb;
+          if(hsl.z > 0.5) {
+            hsl.y = (dif/(2.0 - max_rgb - min_rgb));
+          }
+          else {
+            hsl.y = dif / (max_rgb + min_rgb);
+          }
+
+          if(max_rgb == c.r){
+            hsl.x = (c.g - c.b) / dif + (c.g < c.b ? 6.0 : 0.0);
+          }
+          else if(max_rgb == c.g){
+            hsl.x = (c.b - c.r) / dif + 2.0;
+          }
+          else if(max_rgb == c.b){
+            hsl.x = (c.r - c.g) / dif + 4.0;
+          }
+          hsl.x = hsl.x / 6.0;
+        }
+        return hsl;
+      }
+
+      attribute vec2 a_position;
+      attribute float a_size;
+      attribute float a_color;
+      attribute float a_angle;
+      attribute float a_border_color;
+      attribute float a_transparency;
+      attribute float a_range_by;
+
+      uniform vec2 u_resolution;
+      uniform float u_ratio;
+      uniform float u_scale;
+      uniform mat3 u_matrix;
+      uniform float u_range_from_color;
+      uniform float u_range_to_color;
+      uniform float u_range_min;
+      uniform float u_range_max;
+
+      varying vec4 color;
+      varying vec4 border_color;
+      varying vec2 center;
+      varying float radius;
+      varying vec2 v_position;
+
+      void main() {
+          // Multiply the point size twice:
+          radius = a_size * u_ratio;
+
+          // Scale from [[-1 1] [-1 1]] to the container:
+          vec2 position = (u_matrix * vec3(a_position, 1)).xy;
+          center = position * u_scale;
+          center = vec2(center.x, u_scale * u_resolution.y - center.y);
+          position = position + 2.0 * radius * vec2(cos(a_angle), sin(a_angle));
+          position = (position / u_resolution * 2.0 - 1.0) * vec2(1, -1);
+
+          radius = radius * u_scale;
+
+          gl_Position = vec4(position, 0, 1);
+
+          v_position = a_position;
+          if (u_range_max == 0.0 && u_range_min == 0.0) {
+            // Extract the color:
+            float c = a_color;
+            color.b = mod(c, 256.0); c = floor(c / 256.0);
+            color.g = mod(c, 256.0); c = floor(c / 256.0);
+            color.r = mod(c, 256.0); c = floor(c / 256.0); color /= 255.0;
+            color.a = a_transparency;
+
+            float bc = a_border_color;
+            border_color.b = mod(bc, 256.0); bc = floor(bc / 256.0);
+            border_color.g = mod(bc, 256.0); bc = floor(bc / 256.0);
+            border_color.r = mod(bc, 256.0); bc = floor(bc / 256.0);
+            border_color /= 255.0;
+            border_color.a = a_transparency;
+          }
+          else {
+            float rf = u_range_from_color;
+            vec4 rf_color = vec4(0.0, 0.0, 0.0, 0.0);
+            rf_color.b = mod(rf, 256.0); rf = floor(rf / 256.0);
+            rf_color.g = mod(rf, 256.0); rf = floor(rf / 256.0);
+            rf_color.r = mod(rf, 256.0); rf = floor(rf / 256.0);
+            rf_color /= 255.0;
+            rf_color.a = a_transparency;
+
+            float rt = u_range_to_color;
+            vec4 rt_color = vec4(0.0, 0.0, 0.0, 0.0);
+            rt_color.b = mod(rt, 256.0); rt = floor(rt / 256.0);
+            rt_color.g = mod(rt, 256.0); rt = floor(rt / 256.0);
+            rt_color.r = mod(rt, 256.0); rt = floor(rt / 256.0);
+            rt_color /= 255.0;
+            rt_color.a = a_transparency;
+
+            float val = (a_range_by - u_range_min)/(u_range_max - u_range_min);
+            color.r = rf_color.r + (rt_color.r - rf_color.r)*val;
+            color.g = rf_color.g + (rt_color.g - rf_color.g)*val;
+            color.b = rf_color.b + (rt_color.b - rf_color.b)*val;
+            color.a = a_transparency;
+
+            vec3 hsl_border = rgb2hsl(color);
+            hsl_border[2] = hsl_border[2] * 0.8;
+            border_color = vec4(hsl2rgb(hsl_border), a_transparency);
+          }
+
+      }
+  </script>
+  <script src="index.js"></script>
+</head>
+<body>
+  <div class="spinner-text">
+    <div class="spinner"></div>
+    <span class="message"></span>
+  </div>
+  <div id="container">
+    <div class="graph-container"></div>
+  </div>
+  <div id="map-container">
+    <div id="leaf-map" style="height: 100%; width: 100%;"></div>
+  </div>
+</body>
+</html>
