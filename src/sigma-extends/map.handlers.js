@@ -1,4 +1,4 @@
-var mapHandler = {
+var mapHandler = window.mapHandler = {
   lastZoom: 18,
   zoomed: false,
   moveHandler: function(e){

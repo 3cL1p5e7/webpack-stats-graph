@@ -1,4 +1,4 @@
-import $ from "jquery";
-window.$ = $;
+window.$ = require('jquery');
 window._ = require('underscore');
+window.L = require('leaflet');
 import './vendor.js';

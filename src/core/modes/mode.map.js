@@ -1,4 +1,3 @@
-var map;
 ;(function(undefined) {
   'use strict';
 
@@ -138,13 +137,13 @@ var map;
 
     initLeaflet: function(initZoom){
       var data = {};
-      data.accessToken = 'pk.eyJ1IjoiM2NsMXA1ZTciLCJhIjoiY2lnYjNxNG1tMDUycHZ4bTd1cWpwdTl4eSJ9.p77S8zTz9qJbnEb_lHo84Q';
+      data.accessToken = 'pk.eyJ1IjoiM2NsMXA1ZTciLCJhIjoiY2o3d2JuM3E2NWJpaDJ5bWxlNzRmbzljcCJ9.2m_lloETB2gB6xRQGaIUeQ';
 
       var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
         '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
         'Imagery © <a href="http://mapbox.com">Mapbox</a>';
       // var mbUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-      var mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw';
+      var mbUrl = `https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}`;
 
       var streets = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr, accessToken: data.accessToken}),
         grayscale = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr, accessToken: data.accessToken}),
@@ -154,7 +153,7 @@ var map;
       mapBox.height($(window).height());
       mapBox.width($(window).width());
 
-      map = L.map(mapBox[0].id, {
+      var map = window.map = L.map(mapBox[0].id, {
         center: this.defaultCenter, // moscow
         zoom: initZoom,
         layers: [streets]
