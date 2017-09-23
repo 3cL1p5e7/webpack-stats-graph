@@ -4,8 +4,15 @@ var graphHandler = window.graphHandler = {
   startMouseY: 0,
   currentMouseX: 0,
   currentMouseY: 0,
+  isdrag: false,
+  dragStartHandler: function(e) {
+    graphHandler.isdrag = true;
+  },
+  dragEndHandler: function(e) {
+    graphHandler.isdrag = false;
+  },
   moveHandler: function(e){
-    if (graphHandler.isMouseDown) {
+    if (graphHandler.isMouseDown && !graphHandler.isdrag) {
       graphHandler.currentMouseX = e.clientX;
       graphHandler.currentMouseY = e.clientY;
       var container = sigma.mode.getBox();
@@ -38,6 +45,8 @@ var graphHandler = window.graphHandler = {
     return false;
   },
   downHandler: function (e) {
+    if (graphHandler.isdrag)
+      return;
     graphHandler.startMouseX = e.clientX;
     graphHandler.startMouseY = e.clientY;
     graphHandler.currentMouseX = e.clientX;
@@ -56,6 +65,8 @@ var graphHandler = window.graphHandler = {
     }
   },
   upHandler: function(e){
+    if (graphHandler.isdrag)
+      return;
     switch (e.which) {
       case 2:
         // Middle mouse button pressed
