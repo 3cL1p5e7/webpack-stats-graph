@@ -97,6 +97,14 @@ window.onload = function() {
       sigmaInstance.bind('overEdge outEdge clickEdge doubleClickEdge rightClickEdge', function(e) {
 //      console.log(e);
       });
+      var dragListener = sigma.plugins.dragNodes(sigmaInstance, sigmaInstance.renderers[0]);
+      // sigmaInstance.startForceAtlas2({
+      //   iterationsPerRender: 300,
+      //   edgeWeightInfluence: 1,
+      //   scalingRatio: 100,
+      //   gravity: 1,
+      //   adjustSizes: true
+      // });
       sigma.utils.loader(false);
     });
   });

@@ -1,7 +1,7 @@
 {
   "standartCaptor":false,
   "mode":"map",
-  "dataFileName":"../../static/Json/input1.json",
+  "dataFileName":"../../static/Json/faces.json",
   "sigmaSettings":{
     "nodesPowRatio":0,
     "edgesPowRatio":0,
@@ -24,7 +24,7 @@
     "defaultHoverLabelBGColor":"#2D7FB6",
     "defaultHoverLabelColor":"#2D7FB6",
     "labelHoverBGColor":"node",
-    "webglOversamplingRatio": 1.2
+    "webglOversamplingRatio": 2
   },
   "visualSettings":{
     "border":{

@@ -81,9 +81,15 @@ import './sigma-extends/map.handlers.js';
 import './sigma-extends/graph.handlers.js';
 import './vendor/sigma-plugins/gexf-parser.js';
 import './vendor/sigma-plugins/sigma.parsers.gexf.js';
+import './vendor/sigma-plugins/sigma.drag.js';
+require('./vendor/sigma-plugins/patch-force-atlas!./vendor/sigma-plugins/sigma.forceAtlas2.js');
 
 import './core/visual.js';
 
 import './core/modes/mode.js';
 import './core/modes/mode.graph.js';
 import './core/modes/mode.map.js';
+
+import './vendor/leaflet/leaflet.css';
+window.L = require('./vendor/leaflet/leaflet.js');
+require('./vendor/leaflet/overlay.js');
