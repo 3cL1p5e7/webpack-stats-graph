@@ -86,7 +86,9 @@ window.onload = function() {
       filename = externalSettings.dataFileName;
 
     sigma.utils.fetchFile(filename, function (respText) {
-      var jsonGraph = JSON.parse(respText);
+      // var jsonGraph = JSON.parse(respText);
+      var jsonGraph = window.parse_stats(window.load_stats(JSON.parse(respText)));
+
       sigma.mode.init({map: mapContainer, graph: graphContainer}, sigmaSettings);
       sigma.mode.activate(mode, jsonGraph);
 
@@ -101,11 +103,11 @@ window.onload = function() {
       dragListener.bind('startdrag', graphHandler.dragStartHandler);
       dragListener.bind('dragend', graphHandler.dragEndHandler);
       sigmaInstance.startForceAtlas2({
-        iterationsPerRender: 3,
-        edgeWeightInfluence: 1,
-        scalingRatio: 100,
-        gravity: 1,
-        adjustSizes: true
+        iterationsPerRender: 30,
+        // edgeWeightInfluence: 1,
+        scalingRatio: 1,
+        // gravity: 10,
+        // adjustSizes: true
       });
       sigma.utils.loader(false);
     });

@@ -1,7 +1,7 @@
 {
   "standartCaptor":true,
-  "mode":"map",
-  "dataFileName":"../../static/Json/faces.json",
+  "mode":"graph",
+  "dataFileName":"../../static/Json/stats.json",
   "sigmaSettings":{
     "nodesPowRatio":0,
     "edgesPowRatio":0,
